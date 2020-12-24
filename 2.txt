@@ -3,3 +3,5 @@ Prvo editovanje fajla na github.com portalu.
 Prvo editovanje fajla lokalno na win10 masini.
 
 Drugi edit fajla lokalno na win10 masini.
+
+Drugi edit fajla na github.com portalu.
