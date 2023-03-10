@@ -1,4 +1,4 @@
-name: Deploy Website to S3
+name: Deploy Website to S3 create bucket if not exists
 
 on:
   push:
