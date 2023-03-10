@@ -39,8 +39,8 @@ jobs:
           terraform init
           terraform apply --auto-approve
         env:
-          TERRAFORM_CLI_PATH: ${{ env.TERRAFORM }}
-          
+          TERRAFORM_CLI_PATH: /home/runner/work/_actions/hashicorp/setup-terraform/v1.2.0/terraform/terraform
+
       - name: Set Terraform path for the rest of the workflow
         env:
           TERRAFORM: /home/runner/work/_actions/hashicorp/setup-terraform/v1.2.0/terraform/terraform
