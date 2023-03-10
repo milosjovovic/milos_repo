@@ -34,12 +34,9 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: eu-central-1
-        run: |
-          cd terraform
-          terraform init
-          terraform apply --auto-approve
-          TERRAFORM_CLI_PATH=/home/runner/work/_actions/hashicorp/setup-terraform/v1.2.0/terraform/terraform
-
+        # Remove the "run" key since you are already using "uses"
+        # to run the action
+          
       - name: Set Terraform path for the rest of the workflow
         env:
           TERRAFORM: /home/runner/work/_actions/hashicorp/setup-terraform/v1.2.0/terraform/terraform
