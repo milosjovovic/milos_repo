@@ -46,6 +46,4 @@ jobs:
       - name: Build and Deploy to S3
         if: steps.check_bucket.outputs.exists == 'true'
         run: |
-          npm install
-          npm run build
           aws s3 sync dist s3://${{ secrets.AWS_BUCKET_NAME }} --delete --acl public-read
