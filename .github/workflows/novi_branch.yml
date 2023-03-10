@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v2.5.1
 
       - name: Install AWS CLI
         run: |
@@ -22,7 +22,7 @@ jobs:
         run: aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }} && aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }} && aws configure set default.region eu-central-1
 
       - name: Create new S3 bucket with Terraform
-        uses: hashicorp/setup-terraform@v1
+        uses: hashicorp/setup-terraform@v1.2.0
         with:
           terraform_version: 1.0.9
         env:
