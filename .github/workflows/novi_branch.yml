@@ -1,41 +1,48 @@
 name: Deploy Website
+
 on:
   push:
     branches:
       - novi_branch
+
+env:
+  AWS_REGION: eu-central-1
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-
-    - name: Configure AWS Credentials
+    - name: Checkout
+      uses: actions/checkout@v2
+      
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14.x'
+    
+    - name: Install dependencies
+      run: npm install
+      
+    - name: Build
+      run: npm run build
+      
+    - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
-        aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
-        aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
-        aws-region: ${{secrets.AWS_REGION}}
-
-    - name: Create S3 Bucket
-      uses: jakejarvis/s3-bucket-action@master
-      id: s3bucket
-      with:
-        args: --acl public-read --bucket jovovic-novi-bucket --region ${{secrets.AWS_REGION}}
-        
-    - name: Build and Deploy
-      uses: JamesIves/github-pages-deploy-action@3.7.1
-      with:
-        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        BRANCH: novi_branch
-        FOLDER: dist
-
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+    
+    - name: Create S3 bucket
+      run: |
+        aws s3 mb s3://jovovic-novi-bucket --region ${{ env.AWS_REGION }}
+        aws s3 website s3://jovovic-novi-bucket/ --index-document index.html --error-document error.html --region ${{ env.AWS_REGION }}
+    
     - name: Sync to S3
-      uses: aws-actions/setup-aws-cli@v2
+      uses: jakejarvis/s3-sync-action@master
       with:
-        aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
-        aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
-        aws-region: ${{secrets.AWS_REGION}}
-      run: aws s3 sync dist s3://${{ steps.s3bucket.outputs.bucket_name }} --delete --acl public-read
-
-#
-#
+        args: --acl public-read --follow-symlinks --delete
+      env:
+        AWS_S3_BUCKET: jovovic-novi-bucket
+        AWS_REGION: ${{ env.AWS_REGION }}
+        SOURCE_DIR: 'dist'
