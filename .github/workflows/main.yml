@@ -3,7 +3,7 @@ name: Deploy Website to S3
 on:
   push:
     branches:
-      - default
+      - milos_branch
 
 jobs:
   deploy:
