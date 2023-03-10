@@ -1,67 +1,38 @@
-name: Deploy Website to new S3 bucket created by terraform
-
+name: Deploy Website
 on:
   push:
     branches:
       - novi_branch
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - uses: actions/checkout@v2
 
-      - name: Install AWS CLI
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y python3-pip
-          sudo pip3 install awscli
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
+        aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+        aws-region: ${{secrets.AWS_REGION}}
 
-      - name: Configure AWS credentials
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: eu-central-1
-        run: aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }} && aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }} && aws configure set default.region eu-central-1
+    - name: Create S3 Bucket
+      uses: jakejarvis/s3-bucket-action@master
+      id: s3bucket
+      with:
+        args: --acl public-read --bucket jovovic-novi-bucket --region ${{secrets.AWS_REGION}}
+        
+    - name: Build and Deploy
+      uses: JamesIves/github-pages-deploy-action@3.7.1
+      with:
+        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        BRANCH: novi_branch
+        FOLDER: dist
 
-      - name: Create new S3 bucket with Terraform
-        uses: hashicorp/setup-terraform@v1
-        with:
-          terraform_version: 1.0.9
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: eu-central-1
-        run: |
-          cd terraform
-          terraform init
-          terraform apply --auto-approve
-          TERRAFORM_CLI_PATH=/home/runner/work/_actions/hashicorp/setup-terraform/v1.2.0/terraform/terraform
-
-      - name: Set Terraform path for the rest of the workflow
-        env:
-          TERRAFORM: /home/runner/work/_actions/hashicorp/setup-terraform/v1.2.0/terraform/terraform
-        run: echo "TERRAFORM=$TERRAFORM" >> $GITHUB_ENV
-
-      - name: Deploy website to new S3 bucket with AWS CLI
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: eu-central-1
-        run: |
-          aws s3 sync dist s3://jovovic-novi-bucket --delete --acl public-read
-
-      - name: Configure S3 bucket policy to allow public access
-        uses: hashicorp/terraform-github-actions@v0.6.0
-        with:
-          terraform_version: 1.0.9
-          command: apply
-          vars: |
-            bucket_name = "jovovic-novi-bucket"
-          working-dir: terraform
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: eu-central-1
+    - name: Sync to S3
+      uses: aws-actions/setup-aws-cli@v2
+      with:
+        aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
+        aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+        aws-region: ${{secrets.AWS_REGION}}
+      run: aws s3 sync dist s3://${{ steps.s3bucket.outputs.bucket_name }} --delete --acl public-read
