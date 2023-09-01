@@ -24,17 +24,15 @@ jobs:
         role-duration-seconds: 1200
         audience: sts.amazonaws.com
 
-
-
-- name: Install AWS CLI
+name: Install AWS CLI
   run: |
     sudo apt-get update
     sudo apt-get install -y awscli
 
-- name: Deploy to S3
+name: Deploy to S3
   run: |
     aws s3 sync ./public/ s3://jovovic-bucket --delete
 
-- name: Call sts get-caller-identity
+name: Call sts get-caller-identity
   run: |
     aws sts get-caller-identity
