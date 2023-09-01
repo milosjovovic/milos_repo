@@ -15,7 +15,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v1
 
-    # Direct AWS Credentials Configurationnnn
+    # Direct AWS Credentials Configurationnnnn
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
