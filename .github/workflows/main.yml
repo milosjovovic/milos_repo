@@ -1,27 +1,29 @@
-name: Deploy Website to S3
+name: AWS Assume Role via OIDC and S3 Deployment
 
 on:
   push:
     branches:
       - milos_branch
+    repositories:
+      - milosjovovic/milos_repo
 
 jobs:
-  deploy:
+  assume-role-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-      with:
-        ref: ${{ github.ref }}
+    - name: Checkout
+      uses: actions/checkout@v2
 
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v3
+    - name: Assume AWS Role
+      id: assume-role
+      uses: aws-actions/configure-aws-credentials@v2
       with:
-        aws-region: eu-central-1
-        role-to-assume: arn:aws:iam::630388463273:role/Github_s3_access_jovovic-bucket
-        role-session-name: GitHub-To-AWS-AssumeRole-Session
-        
+        aws-region: ${{ secrets.AWS_REGION }}
+        role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/Github_s3_access_jovovic-bucket
+        role-session-name: GitHubActionsSession
+        role-duration-seconds: 1200
+        web-identity-token-file: /tmp/awscreds
 
     - name: Install AWS CLI
       run: |
@@ -31,3 +33,7 @@ jobs:
     - name: Deploy to S3
       run: |
         aws s3 sync ./public/ s3://jovovic-bucket --delete
+
+    - name: Call sts get-caller-identity
+      run: |
+        aws sts get-caller-identity
