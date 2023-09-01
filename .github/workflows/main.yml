@@ -15,15 +15,13 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Assume AWS Role
-      id: assume-role
+    - name: Set up AWS OIDC authentication
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-region: ${{ secrets.AWS_REGION }}
         role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/Github_s3_access_jovovic-bucket
         role-session-name: GitHubActionsSession
         role-duration-seconds: 1200
-        web-identity-token-file: /tmp/awscreds
 
     - name: Install AWS CLI
       run: |
