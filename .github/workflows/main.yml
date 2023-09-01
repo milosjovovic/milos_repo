@@ -1,3 +1,13 @@
+name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-region: eu-central-1
+        role-to-assume: arn:aws:iam::630388463273:role/Github_s3_access_jovovic-bucket
+        role-session-name: GitHub-To-AWS-AssumeRole-Session
+
+
+
+
 name: Deploy Website to S3
 
 on:
@@ -20,9 +30,9 @@ jobs:
         sudo apt-get install -y awscli
 
     - name: Deploy to S3
-      env:
-        AWS_REGION: "eu-central-1"
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
       run: |
         aws s3 sync ./public/ s3://jovovic-bucket --delete
+
+
+
