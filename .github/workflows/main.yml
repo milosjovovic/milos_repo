@@ -1,28 +1,30 @@
 name: AWS Assume Role via OIDC and S3 Deployment
 
 on:
-push:
-branches:
-- milos_branch
-repositories:
-- milosjovovic/milos_repo
+  push:
+    branches:
+      - milos_branch
+    repositories:
+      - milosjovovic/milos_repo
 
 jobs:
-assume-role-and-deploy:
-runs-on: ubuntu-latest
+  assume-role-and-deploy:
+    runs-on: ubuntu-latest
 
-steps:
-- name: Checkout
-  uses: actions/checkout@v1
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
 
-- name: Set up AWS OIDC authentication
-  uses: aws-actions/configure-aws-credentials@v1
-  with:
-    aws-region: <span class="math-inline">\{\{ secrets\.AWS\_REGION \}\}
-role-to-assume: arn:aws:iam::{{ secrets.AWS_ACCOUNT_ID }}:role/Github_s3_access_jovovic-bucket
-role-session-name: GitHubActionsSession
-role-duration-seconds: 1200
-audience: sts.amazonaws.com
+    - name: Set up AWS OIDC authentication
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-region: <span class="math-inline">\{\{ secrets\.AWS\_REGION \}\}
+        role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/Github_s3_access_jovovic-bucket
+        role-session-name: GitHubActionsSession
+        role-duration-seconds: 1200
+        audience: sts.amazonaws.com
+
+
 
 - name: Install AWS CLI
   run: |
