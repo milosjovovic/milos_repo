@@ -21,7 +21,7 @@ jobs:
         aws-region: eu-central-1
         role-to-assume: arn:aws:iam::630388463273:role/Github_s3_access_jovovic-bucket
         role-session-name: GitHub-To-AWS-AssumeRole-Session
-        web-identity-token-file: ${{ secrets.AWS_WEB_IDENTITY_TOKEN_FILE }}
+        
 
     - name: Install AWS CLI
       run: |
